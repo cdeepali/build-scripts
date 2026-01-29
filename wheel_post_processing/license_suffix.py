@@ -67,14 +67,20 @@ def get_rpm_license(pkg_name):
 def find_project_root(so_path, max_up=10):
     current = os.path.dirname(so_path)
     for _ in range(max_up):
+        if not current:
+            break  # stop if directory doesn't exist
+
         for f in os.listdir(current):
             if LICENSE_PATTERN.match(f):
-                return current
+                return current  # found LICENSE/COPYING
+
         parent = os.path.dirname(current)
         if parent == current:
-            break
+            break  # reached root
         current = parent
-    return None
+
+    return None  # no license found
+
 
 def find_license_in_directory(directory):
     for f in os.listdir(directory):
@@ -134,20 +140,31 @@ def update_record(dist_info_dir, file_paths):
         for parts in record_map.values():
             f.write(",".join(parts) + "\n")
 
+
 def process_so_file(so_path, rpm_licenses, bundled_licenses):
     original_name = os.path.basename(so_path)
     normalized_name = normalize_so_name(original_name)
 
+    # Track if a license was successfully found
+    license_found = False
+
     for match_so in find_all_so_anywhere(normalized_name):
+        if not match_so:
+            continue  # skip empty paths
+
+        # RPM license check
         pkg = get_rpm_package(match_so)
         if pkg:
             license_text = get_rpm_license(pkg)
             if license_text:
                 rpm_licenses.setdefault(license_text, []).append(original_name)
+                license_found = True
+                break  # stop after successfully found RPM license
             else:
-                bundled_licenses.setdefault(f"{original_name}_license_not_found", []).append(original_name)
-            return
+                # RPM package exists but license not found, continue to next path
+                continue
 
+        # Bundled license check
         project_root = find_project_root(match_so)
         if project_root:
             license_file = find_license_in_directory(project_root)
@@ -155,11 +172,16 @@ def process_so_file(so_path, rpm_licenses, bundled_licenses):
                 try:
                     with open(license_file, "r", encoding="utf-8", errors="ignore") as f:
                         bundled_licenses.setdefault(f.read(), []).append(original_name)
-                    return
+                        license_found = True
+                        break  # stop after successfully read bundled license
                 except Exception:
-                    pass
+                    # Failed to read this license file, continue to next match_so
+                    continue
 
-    bundled_licenses.setdefault(f"{original_name}_license_not_found", []).append(original_name)
+    # Fallback if no license found in any path
+    if not license_found:
+        bundled_licenses.setdefault(f"{original_name}_license_not_found", []).append(original_name)
+
 
 # Wheel version suffix utilities 
 def read_version_from_metadata(dist_info_dir):
