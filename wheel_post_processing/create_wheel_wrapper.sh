@@ -249,7 +249,7 @@ echo "Wheel count detected: $wheel_count"
 if [ "$wheel_count" -eq 1 ]; then
     wheel_file=$(ls *.whl)
     echo "=============== Running auditwheel repair on $wheel_file =================="
-    pip install auditwheel patchelf
+    pip install auditwheel "patchelf>=0.14"
 
     audit_output=$(auditwheel repair "$wheel_file" --wheel-dir "$WHEELHOUSE" 2>&1) || true
 
