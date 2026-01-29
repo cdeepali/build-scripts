@@ -26,7 +26,11 @@ install_python_version() {
     local version=$1
     echo "Installing Python version: $version"
     case $version in
-    "3.9" | "3.11" | "3.12")
+	"3.9")
+        echo "Starting python installing..."
+        yum install -y python3 python3-devel python3-pip
+        ;;
+    "3.11" | "3.12")
         echo "Starting python installing..."
         yum install -y python${version} python${version}-devel python${version}-pip
         ;;
@@ -304,4 +308,3 @@ cleanup "$VENV_DIR"
 [ -n "$TEMP_BUILD_SCRIPT_PATH" ] && rm "$CURRENT_DIR/$TEMP_BUILD_SCRIPT_PATH"
 
 exit $EXIT_CODE
-
