@@ -388,7 +388,7 @@ package_tags = {
   "argon2-cffi-bindings": [
     "25.1.0"
   ],
-  "array-record": [
+  "array_record": [
     "v0.8.3",
     "v0.8.2",
     "v0.8.1",
@@ -436,7 +436,7 @@ package_tags = {
     "0.15.0",
     "0.14.0"
   ],
-  "av": [
+  "pyav": [
     "v16.0.1",
     "v16.0.0",
     "v15.1.0",
@@ -57210,7 +57210,7 @@ package_tags = {
     "0.2.1",
     "0.2.0"
   ],
-  "jpype1": [
+  "jpype": [
     "v1.6.0",
     "v1.5.2",
     "v1.5.1",
@@ -57782,7 +57782,7 @@ package_tags = {
     "lxml-4.6.4-1",
     "lxml-4.6.4"
   ],
-  "MACS3": [
+  "macs": [
     "v3.0.3",
     "v3.0.2",
     "v3.0.1",
@@ -58014,7 +58014,7 @@ package_tags = {
     "1.3.0",
     "1.0.0"
   ],
-  "msgpack": [
+  "msgpack-python": [
     "v1.1.2",
     "v1.1.1",
     "v1.1.0",
@@ -59838,7 +59838,7 @@ package_tags = {
     "1_99_12_1",
     "1_99_12"
   ],
-  "pulsar-client": [
+  "Pulsar-client-python": [
     "v3.9.0",
     "v3.8.0",
     "v3.7.0",
@@ -60510,7 +60510,7 @@ package_tags = {
     "v0.6.0",
     "v0.5.0"
   ],
-  "PyWavelets": [
+  "pywt": [
     "v1.9.0",
     "v1.8.0",
     "v1.7.0",
@@ -60555,7 +60555,9 @@ package_tags = {
     "v14.1.0",
     "v14.0.1",
     "v14.0.0",
-    "v13.1.0"
+    "v13.1.0",
+    "v23.2.0",
+    "v25.1.0"
   ],
   "rdflib": [
     "7.5.0",
@@ -61942,7 +61944,7 @@ package_tags = {
     "sympy-0.7.4",
     "sympy-0.7.3"
   ],
-  "TBB": [
+  "onetbb": [
     "v2022.3.0",
     "v2022.2.0",
     "v2022.1.0",
@@ -64894,7 +64896,7 @@ package_tags = {
     "v0.1.7",
     "v0.1.6"
   ],
-  "confluent_kafka": [
+  "confluent-kafka": [
     "v2.12.0",
     "v2.11.1",
     "v2.11.0",
@@ -65118,7 +65120,7 @@ package_tags = {
     "v0.16b1",
     "v0.16b0"
   ],
-  "oracledb": [
+  "python-oracledb": [
     "v3.4.1",
     "v3.4.0",
     "v3.3.0",
