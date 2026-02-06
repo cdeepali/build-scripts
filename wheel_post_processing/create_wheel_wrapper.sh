@@ -26,7 +26,11 @@ install_python_version() {
     local version=$1
     echo "Installing Python version: $version"
     case $version in
-    "3.9" | "3.11" | "3.12")
+	"3.9")
+        echo "Starting python installing..."
+        yum install -y python3 python3-devel python3-pip
+        ;;
+    "3.11" | "3.12")
         echo "Starting python installing..."
         yum install -y python${version} python${version}-devel python${version}-pip
         ;;
@@ -35,7 +39,7 @@ install_python_version() {
             echo "Installing dependencies required for python installation..."
             yum install -y sudo zlib-devel wget ncurses git
             echo "Installing..."
-            yum install -y make cmake openssl-devel
+            yum install -y make cmake openssl-devel xz xz-devel
             echo "Installing..."
             yum install -y libffi libffi-devel sqlite sqlite-devel sqlite-libs bzip2-devel
             echo "Starting python installing..."
@@ -56,7 +60,7 @@ install_python_version() {
             echo "Installing dependencies required for python installation..."
             yum install -y sudo zlib-devel wget ncurses git
             echo "Installing..."
-            yum install -y make cmake openssl-devel
+            yum install -y make cmake openssl-devel xz xz-devel
             echo "Installing..."
             yum install -y libffi libffi-devel sqlite sqlite-devel sqlite-libs bzip2-devel
             echo "Starting python installing..."
@@ -245,7 +249,7 @@ echo "Wheel count detected: $wheel_count"
 if [ "$wheel_count" -eq 1 ]; then
     wheel_file=$(ls *.whl)
     echo "=============== Running auditwheel repair on $wheel_file =================="
-    pip install auditwheel patchelf
+    pip install auditwheel "patchelf>=0.14"
 
     audit_output=$(auditwheel repair "$wheel_file" --wheel-dir "$WHEELHOUSE" 2>&1) || true
 
@@ -304,4 +308,3 @@ cleanup "$VENV_DIR"
 [ -n "$TEMP_BUILD_SCRIPT_PATH" ] && rm "$CURRENT_DIR/$TEMP_BUILD_SCRIPT_PATH"
 
 exit $EXIT_CODE
-

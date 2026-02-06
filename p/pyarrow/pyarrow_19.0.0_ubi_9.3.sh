@@ -24,10 +24,10 @@ PACKAGE_DIR=arrow/python
 PACKAGE_VERSION=${1:-apache-arrow-19.0.0}
 PACKAGE_URL=https://github.com/apache/arrow
 version=$(echo "$PACKAGE_VERSION" | sed 's/^apache-arrow-//')
+CURRENT_DIR="${PWD}"
 
 echo "Install dependencies and tools."
 yum install -y python python-pip python-devel wget git make  python-devel xz-devel openssl-devel cmake zlib-devel libjpeg-devel gcc-toolset-13 cmake libevent libtool pkg-config  brotli-devel.ppc64le bzip2-devel lz4-devel 
-
 export PATH=/opt/rh/gcc-toolset-13/root/usr/bin:$PATH
 
 SCRIPT_DIR=$(pwd)
@@ -756,8 +756,9 @@ popd
 cd $SCRIPT_DIR
 
 echo "Installing prerequisite for arrow..."
-pip install setuptools-scm Cython
-pip install numpy==2.0.2
+pip install setuptools-scm "cython<3"
+pip install numpy==1.26.4 pandas==2.0.3
+
 
 export PYARROW_BUNDLE_ARROW_CPP=1
 export LD_LIBRARY_PATH=${ARROW_HOME}/lib:${LD_LIBRARY_PATH}
@@ -791,6 +792,8 @@ else
     export PYARROW_WITH_CUDA=0
 fi
 
+export LD_LIBRARY_PATH=${CURRENT_DIR}/pyarrow_prefix/lib/:$LD_LIBRARY_PATH
+
 cd python
 
 if ! pip install . ; then
@@ -814,7 +817,7 @@ echo "testing pyarrow...."
 cd ..
 export LD_LIBRARY_PATH=${SNAPPY_PREFIX}/lib:${C_ARES_PREFIX}/lib:${THRIFT_PREFIX}/lib:${UTF8PROC_PREFIX}/lib:${RE2_PREFIX}/lib:${LIBPROTO_INSTALL}/lib64:${GRPC_PREFIX}/lib:${ORC_PREFIX}/lib:${OpenBLASInstallPATH}/lib
 
-pip install -r python/requirements-test.txt
+pip install -r python/requirements-test.txt "pytest<9"
 
 PYARROW_LOCATION=$(python -c "import os; import pyarrow; print(os.path.dirname(pyarrow.__file__))")
 export PARQUET_TEST_DATA="$(pwd)/cpp/submodules/parquet-testing/data"
