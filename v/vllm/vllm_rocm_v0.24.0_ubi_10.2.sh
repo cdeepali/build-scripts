@@ -28,51 +28,16 @@ set -Eeuo pipefail
 
 SCRIPT_NAME="$(basename "$0")"
 
-# ─── System packages ──────────────────────────────────────────────────────────
-# Install before argument parsing so --help works without side-effects only
-# if sourced; the dnf step is intentionally unconditional for container use.
-EPEL_URL="https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm"
-if ! rpm -q epel-release &>/dev/null; then
-    echo "==> Installing EPEL"
-    dnf install -y "$EPEL_URL"
-fi
-
-# The UBI 10 AppStream repo only ships a subset of packages. Add the full
-# AlmaLinux 10 AppStream and BaseOS repos so packages like libdrm-devel are
-# available and their runtime dependencies can be satisfied.
-if [[ ! -f /etc/yum.repos.d/almalinux-appstream.repo ]]; then
-    echo "==> Adding AlmaLinux 10 AppStream and BaseOS repos"
-    cat > /etc/yum.repos.d/almalinux-appstream.repo <<'REPO'
-[almalinux10-appstream]
-name=AlmaLinux 10 AppStream
-baseurl=https://repo.almalinux.org/almalinux/10/AppStream/ppc64le/os/
-enabled=1
-gpgcheck=1
-gpgkey=https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux-10
-
-[almalinux10-baseos]
-name=AlmaLinux 10 BaseOS
-baseurl=https://repo.almalinux.org/almalinux/10/BaseOS/ppc64le/os/
-enabled=1
-gpgcheck=1
-gpgkey=https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux-10
-REPO
-fi
-
 echo "==> Installing system dependencies"
 dnf install -y \
     git              \
     gcc-toolset-15   \
-    python3.13       \
-    python3.13-libs  \
-    python3.13-devel \
     zlib-devel       \
     libjpeg-devel    \
     openblas-devel   \
-    cmake            \
-    libdrm-devel
+    cmake            
 
-PYTHON_BIN="/usr/bin/python3.13"
+PYTHON_BIN="/root/vllm_rocm/buildenv/bin/python"
 GCC_TOOLSET_BIN="/opt/rh/gcc-toolset-15/root/usr/bin"
 VLLM_REPO_URL="https://github.com/vllm-project/vllm.git"
 VLLM_SRC_DIR="$PWD/vllm"
@@ -80,8 +45,10 @@ VLLM_VERSION="v0.24.0"
 VENV_DIR="$PWD/vllm-venv"
 ROCM_PATH="/opt/rocm"
 ROCM_REPO_URL="https://public.dhe.ibm.com/software/server/POWER/Linux/AMD/ROCm/RHEL/10/ppc64le/"
-TORCH_WHEEL_DIR="$PWD/torch-wheels"
-EXTRA_WHEEL_DIR="$PWD/extra-wheels"
+#TORCH_WHEEL_DIR="$PWD/torch-wheels"
+#EXTRA_WHEEL_DIR="$PWD/extra-wheels"
+TORCH_WHEEL_DIR="/root/vllm_rocm/torch_wheels"
+EXTRA_WHEEL_DIR="/root/vllm_rocm/extra-wheels"
 OUTPUT_DIR=""          # resolved to ${VLLM_SRC_DIR}/../vllm-wheels after arg parsing
 SKIP_CLONE=0
 
@@ -331,7 +298,7 @@ create_and_activate_venv() {
 
     python -m pip install -U pip
     echo "Installing cmake and ninja into venv..."
-    python -m pip install cmake ninja
+    python -m pip install cmake ninja meson
 }
 
 find_single_package_file() {
@@ -700,6 +667,17 @@ install_ibm_wheel_packages() {
     python -m pip install sentencepiece --index-url "$IBM_WHEEL_INDEX"
 }
 
+build_libdrm() {
+    echo "Build libdrm from source..."
+    git clone https://gitlab.freedesktop.org/mesa/drm.git
+    cd drm
+    git checkout libdrm-2.4.128
+    meson setup build --prefix=/usr/local
+    ninja -C build
+    ninja -C build install
+    ldconfig
+}
+
 build_vllm_wheel() {
     cd "$VLLM_SRC_DIR"
 
@@ -730,7 +708,7 @@ main() {
     parse_args "$@"
     # Resolve OUTPUT_DIR now that VLLM_SRC_DIR is final
     OUTPUT_DIR="${OUTPUT_DIR:-$(dirname "$VLLM_SRC_DIR")/vllm-wheels}"
-    resolve_python
+#    resolve_python
     print_python_info
 
     install_rocm_from_rpms
@@ -743,6 +721,7 @@ main() {
     apply_vllm_patches
     install_extra_dependencies
     install_ibm_wheel_packages
+    build_libdrm
     build_vllm_wheel
 }
 
